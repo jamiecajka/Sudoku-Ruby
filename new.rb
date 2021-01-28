@@ -13,9 +13,9 @@ board = Array.new
 
  a = 0
  b = 0
- box = Array.new
-def make_a_box(a,b,board,box)  #make box array to test 3x3 square
- 3.times do
+def make_a_box(a,b,board)  #make box array to test 3x3 square
+  box = Array.new
+  3.times do
    line_test = Array.new
    3.times do
      line_test << board[a][b]
@@ -24,21 +24,22 @@ def make_a_box(a,b,board,box)  #make box array to test 3x3 square
    box << line_test
    a += 1
    b = b - 3
- end
- return box
+  end
+  return box
 end
 
-column =  Array.new
-def make_a_column(a,b,board,column)  #make column array to test column
+def make_a_column(b,board)  #make column array to test column
+  a = 0
+  column =  Array.new
   9.times do
-    column << board[b][a]
-    b += 1
+    column << board[a][b]
+    a += 1
   end
   return column
 end
 
-available = Array.new
-def make_available_number_list(available)  #create array of available numbers
+def make_available_number_list()  #create array of available numbers
+  available = Array.new
   num = 1
   9.times do
     available << num
@@ -47,37 +48,66 @@ def make_available_number_list(available)  #create array of available numbers
   return available.shuffle!
 end
 
-#make row array to test row
-row = board[a]
 
-make_a_box(a,b,board,box)
-make_a_column(a,b,board,column)
-make_available_number_list(available)
-
-line = 0
-col = 0
-count = 8
-while available.count > 0  #fill in first box
-  num = available[0]
-  if !box.include?(num) && !column.include?(num) && !row.include?(num)
-    board[line][col] = num
-    box[line][col] = num
-    available = available.slice!(1,count)
-    count -= 1
-  else
-    go_to_end = available.shift()
-    available << go_to_end
+def complete_a_row(line,col,a,b,board)
+  box = make_a_box(a,col,board)
+  column = make_a_column(col,board)
+  available = make_available_number_list()
+  row = board[line]
+  count = 9
+  redos = 0
+  box_col = 0
+  while row.include?(0)  #fill in row
+    num = available[0]
+    #binding.pry
+    if !box[0].include?(num) && !box[1].include?(num) && !box[2].include?(num) && !column.include?(num) && !row.include?(num)
+      board[line][col] = num
+      box[line][box_col] = num
+      row[col] = num
+      available.shift
+      count -= 1
+      col += 1
+      box_col += 1
+      if box_col % 3 == 0
+        box = []
+        box = make_a_box(a,col,board)
+        box_col = 0
+      end
+      column = []
+      column = make_a_column(col,board)
+      #  binding.pry
+    else
+      binding.pry
+      if count > redos
+        reject = available.shift
+        available << reject
+        redos += 1
+      else
+        available = []
+        available = make_available_number_list()
+        board[line] = [0,0,0,0,0,0,0,0,0]
+        row = board[line]
+        count = 9
+        redos = 0
+        col = b
+      end
+      #binding.pry
+    end
   end
-  if col == 2
-    line += 1
-    col = 0
-    row = board[line]
-  else
-    col += 1
-  end
-  column = []
-  make_a_column(col,0,board,column)
-  #binding.pry
+  return board
 end
 
+board = complete_a_row(0,0,a,b,board)
+  binding.pry
+
+  #line = 0
+  #col = 4
+  #b = 3
+  #count = 8
+  #column = []
+  #box = []
+  #make_a_box(a,b,board,box)
+  #make_a_column(b,0,board,column)
+  #make_available_number_list(available)
+  board = complete_a_row(1,0,a,b,board)
   binding.pry
